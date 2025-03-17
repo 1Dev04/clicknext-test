@@ -1,5 +1,10 @@
-<script setup> 
+<script setup>
 import { ref } from 'vue';
+import { useAuthStore } from '@/stores/authStore'; // ดึง Store มาใช้
+import { useRouter } from 'vue-router';
+
+const authStore = useAuthStore();
+const router = useRouter();
 
 // set Empty ref(สร้างค่าที่สามารถเปลี่ยนแปลงได้)
 const email = ref(''); 
@@ -13,52 +18,53 @@ const emailPattern = (value) => {
 
 // กำหนด Regex (password)
 const passwordPattern = (value) => {
-    const containsUppercase = /[A-Z]/.test(value) // ต้องมี A-Z อย่างน้อย 1 ตัว
-      const containsLowercase = /[a-z]/.test(value) // ต้องมี a-z อย่างน้อย 1 ตัว
-      const containsNumber = /[0-9]/.test(value) //ต้องมีตัวเลข 0-9 อย่างน้อย 1 ตัว
-      const containsSpecial = /[#?!@$%^&*-]/.test(value) // ต้องมีอักขระพิเศษ อย่างน้อย 1 ตัว
-      return containsUppercase && containsLowercase && containsNumber && containsSpecial;
+    const containsUppercase = /[A-Z]/.test(value); // ต้องมี A-Z อย่างน้อย 1 ตัว
+    const containsLowercase = /[a-z]/.test(value); // ต้องมี a-z อย่างน้อย 1 ตัว
+    const containsNumber = /[0-9]/.test(value); // ต้องมีตัวเลข 0-9 อย่างน้อย 1 ตัว
+    const containsSpecial = /[#?!@$%^&*-]/.test(value); // ต้องมีอักขระพิเศษ อย่างน้อย 1 ตัว
+    return containsUppercase && containsLowercase && containsNumber && containsSpecial;
 };
- 
+
 // Alert message email and password
 const login = () => {
     if (email.value === "" && password.value === "") {
-        alert("Please enter your email and password. ❌");
+        alert("กรุณากรอกอีเมล์และรหัสผ่านของคุณ ❌");
     } else if (email.value === "") {
-        alert("Please enter your email. ❌");
+        alert("กรุณากรอกอีเมล์ของคุณ ❌");
     } else if (!emailPattern(email.value)) {
-        alert("Invalid email format. Please enter a valid email. ❌");
-    } else if (!passwordPattern(password.value)) {
-        alert("Password must contain at least: \n- 1 uppercase letter \n- 1 lowercase letter \n- 1 number \n- 1 special character (#?!@$%^&*-) ❌"); 
+        alert("รูปแบบอีเมล์ไม่ถูกต้อง กรุณาใส่อีเมล์ที่ถูกต้อง ❌");
     } else if (password.value === "") {
-        alert("Please enter your password. ❌");
+        alert("กรุณากรอกรหัสผ่านของคุณ ❌");
+    } else if (!passwordPattern(password.value)) {
+        alert("รหัสผ่านต้องประกอบด้วยอย่างน้อย: \n- อักษรตัวพิมพ์ใหญ่ 1 ตัว \n- อักษรตัวพิมพ์เล็ก 1 ตัว \n- ตัวเลข 1 ตัว \n- อักขระพิเศษ 1 ตัว (#?!@$%^&*-) ❌"); 
     } else {
-        alert("Login successful. 🎉");
-       
+        alert("การเข้าสู่ระบบสำเร็จแล้ว 🎉");
+        authStore.login(email.value, password.value);
+        router.push('/deposit-withdraw');
     }
- 
 };
 
+// คืนค่าตัวแปรให้ Vue ใช้
 </script>
 
-
-
 <template>
-    <!-- จัดการ layout กำหนดภายในเป็นแนวตั้ง จัดให้อยู่กึ่งกลาง สูงเต็มจอ -->
-    <div class="d-flex flex-column  justify-content-center vh-100">
-        <!-- กำหน้ดให้อยู่ฝั่งซ้าย -->
+    <div class="login-container">
+         <!-- จัดการ layout กำหนดภายในเป็นแนวตั้ง จัดให้อยู่กึ่งกลาง สูงเต็มจอ -->
+    <div class="d-flex flex-column justify-content-center vh-100">
+        <!-- กำหนดให้อยู่ฝั่งซ้าย -->
         <h6 class="align-self-start">Email *</h6>
         <!-- กำหนดสไตล์ กำหนดระยะของบรรทัด -->
         <input v-model="email" type="email" class="form-control mb-4" placeholder="Username" maxlength="50" />
         <h6 class="align-self-start">Password *</h6>
         <input v-model="password" type="password" class="form-control mb-4" placeholder="Password" maxlength="20"/>
-        <button @click="login"  class="btn btn-dark">Login</button>
+        <button @click="login" class="btn btn-dark">Login</button>
     </div>
-
+    </div>
+   
 </template>
 
-<style>
-#app {
+<style scoped>
+.login-container{
     /* font */
     font-family: Avenir, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -77,7 +83,3 @@ const login = () => {
     margin-top: 100px;
 }
 </style>
-
-
-
-

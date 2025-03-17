@@ -11,17 +11,22 @@
   </nav>
 
   <div class="d-none d-lg-block position-fixed vh-100 bg-body-tertiary p-5 text-center" style="width: 250px">
-    <button type="button" @click="showTransaction" :class="{'btn-dark text-white': currentView === 'transaction', 'btn-outline-dark': currentView !== 'transaction'}" class="btn btn-outline-dark border-0 mb-4 fw-bold w-100" >
+    <button type="button" @click="showDepoWith"
+      :class="{ 'btn-dark text-white': currentView === 'depowith', 'btn-outline-dark': currentView !== 'depowith' }"
+      class="btn btn-outline-dark border-0 mb-4 fw-bold w-100">
       Deposit /<br />Withdraw
     </button>
-    <button type="button" @click="showHistory" :class="{'btn-dark text-white' : currentView === 'history', 'btn-outline-dark': currentView !== 'history'}" class="btn btn-outline-dark border-0 mb-4 fw-bold w-100">
+    <button type="button" @click="showTran"
+      :class="{ 'btn-dark text-white': currentView === 'transaction', 'btn-outline-dark': currentView !== 'transaction' }"
+      class="btn btn-outline-dark border-0 mb-4 fw-bold w-100">
       Transaction
     </button>
   </div>
 
-  <div class="content" v-if="currentView === 'transaction'">
-    <div class="container d-flex flex-column justify-content-center align-items-center mt-5 col-sm-10 col-md-10 col-lg-10 p-5">
-      <div class="w-10">
+  <div class="content" v-if="currentView === 'depowith'">
+    <div
+      class="container d-flex flex-column justify-content-center align-items-center mt-5 col-sm-10 col-md-10 col-lg-10 p-5">
+      <div class="w-10 ">
         <h4 class="mt-5 text-center">
           จำนวนเงินคงเหลือ {{ balance.toLocaleString() }} บาท
         </h4>
@@ -30,18 +35,21 @@
           placeholder="กรอกจำนวนเงิน" />
       </div>
       <div class="d-flex justify-content-center gap-3 mt-3">
-        <button type="button" class="btn btn-success fw-bold px-4" style="min-width: 100px" @click="openConfirmModal('ฝาก')">
+        <button type="button" class="btn btn-success fw-bold px-4" style="min-width: 100px"
+          @click="openConfirmModal('ฝาก')">
           ฝาก
         </button>
-        <button type="button" class="btn btn-danger fw-bold px-4" style="min-width: 100px" @click="openConfirmModal('ถอน')">
+        <button type="button" class="btn btn-danger fw-bold px-4" style="min-width: 100px"
+          @click="openConfirmModal('ถอน')">
           ถอน
         </button>
       </div>
     </div>
   </div>
 
-  <div class="content" v-if="currentView === 'history'">
-    <div class="container d-flex flex-column justify-content-center align-items-center mt-5 col-sm-10 col-md-10 col-lg-10 p-5">
+  <div class="content" v-if="currentView === 'transaction'">
+    <div
+      class="container d-flex flex-column justify-content-center align-items-center mt-5 col-sm-10 col-md-10 col-lg-10 p-5">
       <TransactionPage />
     </div>
   </div>
@@ -52,8 +60,8 @@
       <h4>ยืนยันการ{{ transactionType }}</h4>
       <p>จำนวนเงิน {{ tempAmount.toLocaleString() }} บาท</p>
       <div class="button-set">
-        <button @click="confirmTransaction" class="btn btn-dark ">ยืนยัน</button>
-      <button @click="showModal = false" class="btn btn-light ">ยกเลิก</button>
+        <button @click="confirmDepoWith" class="btn btn-dark ">ยืนยัน</button>
+        <button @click="showModal = false" class="btn btn-light ">ยกเลิก</button>
       </div>
     </div>
   </div>
@@ -61,8 +69,12 @@
 
 <script>
 import { ref, watch, onMounted, onBeforeUnmount } from "vue";
+import { useAuthStore } from "@/stores/authStore";
+import { useRouter } from "vue-router";
 import { Collapse } from "bootstrap";
 import TransactionPage from "./TransactionPage.vue";
+
+
 
 export default {
   components: { TransactionPage },
@@ -70,10 +82,13 @@ export default {
     const navbar = ref(null);
     const amount = ref(0);
     const balance = ref(0);
-    const currentView = ref("transaction");
+    const currentView = ref("depowith");
     const showModal = ref(false);
     const transactionType = ref("");
     const tempAmount = ref(0);
+    
+    const authStore = useAuthStore();
+    const router = useRouter();
 
     watch(amount, (newValue, oldValue) => {
       if (isNaN(newValue) || newValue < 0 || newValue > 100000) {
@@ -111,7 +126,7 @@ export default {
       }
     };
 
-    const confirmTransaction = () => {
+    const confirmDepoWith = () => {
       if (transactionType.value === "ฝาก") {
         balance.value += tempAmount.value;
       } else if (transactionType.value === "ถอน" && tempAmount.value <= balance.value) {
@@ -123,25 +138,32 @@ export default {
       showModal.value = false;
     };
 
-    const showTransaction = () => {
+    const showDepoWith = () => {
+      currentView.value = "depowith";
+    };
+
+    const showTran = () => {
       currentView.value = "transaction";
     };
 
-    const showHistory = () => {
-      currentView.value = "history";
+
+    const logout = () => {
+      authStore.logout();
+      router.push('/');
     };
 
     return {
       balance,
       amount,
       openConfirmModal,
-      confirmTransaction,
+      confirmDepoWith,
       showModal,
       transactionType,
       tempAmount,
       currentView,
-      showTransaction,
-      showHistory
+      showDepoWith,
+      showTran,
+      logout
     };
   },
 };
@@ -154,7 +176,8 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.3); /* ลดความทึบ */
+  background: rgba(0, 0, 0, 0.3);
+  /* ลดความทึบ */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -162,18 +185,24 @@ export default {
 
 .modal-content {
   background: white;
-  padding: 10px; /* ลด padding */
+  padding: 10px;
+  /* ลด padding */
   border-radius: 8px;
-  text-align: start;  /* วางทางซ้าย */
-  max-width: 500px; /* จำกัดความกว้าง */
+  text-align: start;
+  /* วางทางซ้าย */
+  max-width: 500px;
+  /* จำกัดความกว้าง */
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .button-set {
   display: flex;
-  justify-content: start; /* จัดให้อยู่ตรงซ้าย */
-  gap: 10px; /* เพิ่มระยะห่างระหว่างปุ่ม */
-  margin-top: 10px; /* เพิ่มระยะห่างจากข้อความด้านบน */
-   
+  justify-content: start;
+  /* จัดให้อยู่ตรงซ้าย */
+  gap: 10px;
+  /* เพิ่มระยะห่างระหว่างปุ่ม */
+  margin-top: 10px;
+  /* เพิ่มระยะห่างจากข้อความด้านบน */
+
 }
 </style>
