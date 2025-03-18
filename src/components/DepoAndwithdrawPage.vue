@@ -1,15 +1,17 @@
 <template>
+  <!-- Section Navbar  -->
   <nav class="navbar navbar-expand-lg px-4 border border-black bg-transparent">
     <div class="container-fluid">
       <button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
         aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <h3 class="navbar px-4">Clicknext</h3>
+      <h3 class="mt-2">Clicknext</h3>
       <button @click="logout" class="btn btn-dark">Logout</button>
     </div>
   </nav>
 
+  <!-- Section button choose page (big) -->
   <div class="d-none d-lg-block position-fixed vh-100 bg-body-tertiary p-5 text-center" style="width: 250px">
     <button type="button" @click="showDepoWith"
       :class="{ 'btn-dark text-white': currentView === 'depowith', 'btn-outline-dark': currentView !== 'depowith' }"
@@ -23,16 +25,35 @@
     </button>
   </div>
 
+  <!-- Section button choose page (smail) -->
+
+  <div class="collapse navbar-collapse navbar-light bg-light fixed-top" id="navbarNav">
+    <div class="d-flex flex-column justify-content-center align-items-center">
+      <button type="button" @click="showDepoWith"
+        :class="{ 'btn-dark text-white': currentView === 'depowith', 'btn-outline-dark': currentView !== 'depowith' }"
+        class="btn btn-outline-dark border-0 mb-4 mt-3 fw-bold w-50">
+        Deposit /<br />Withdraw
+      </button>
+
+      <button type="button" @click="showTran"
+        :class="{ 'btn-dark text-white': currentView === 'transaction', 'btn-outline-dark': currentView !== 'transaction' }"
+        class="btn btn-outline-dark border-0 mb-4 fw-bold w-50">
+        Transaction
+      </button>
+    </div>
+  </div>
+
+  <!-- container Deposit/Withdraw -->
   <div class="content" v-if="currentView === 'depowith'">
     <div
       class="container d-flex flex-column justify-content-center align-items-center mt-5 col-sm-10 col-md-10 col-lg-10 p-5">
       <div class="w-10 ">
         <h4 class="mt-5 text-center">
-          จำนวนเงินคงเหลือ {{ balance.toLocaleString() }} บาท
+          จำนวนเงินคงเหลือ {{ transactionStore.balance }} บาท
         </h4>
         <h6 class="mt-5 align-self-start">จำนวนเงิน *</h6>
-        <input v-model.number="amount" class="form-control mb-4" type="number" min="0" max="100000"
-          placeholder="กรอกจำนวนเงิน" />
+        <input v-model.number="amount" @input="validateAmount" class="form-control mb-4" type="number" min="0"
+          max="100000" placeholder="กรอกจำนวนเงิน" />
       </div>
       <div class="d-flex justify-content-center gap-3 mt-3">
         <button type="button" class="btn btn-success fw-bold px-4" style="min-width: 100px"
@@ -47,6 +68,7 @@
     </div>
   </div>
 
+  <!-- Page TransactionPage -->
   <div class="content" v-if="currentView === 'transaction'">
     <div
       class="container d-flex flex-column justify-content-center align-items-center mt-5 col-sm-10 col-md-10 col-lg-10 p-5">
@@ -68,34 +90,35 @@
 </template>
 
 <script>
-import { ref, watch, onMounted, onBeforeUnmount } from "vue";
+import { ref, onMounted, onBeforeUnmount, computed } from "vue";
 import { useAuthStore } from "@/stores/authStore";
 import { useRouter } from "vue-router";
 import { Collapse } from "bootstrap";
 import TransactionPage from "./TransactionPage.vue";
-
-
+import { useTransactionStore } from "@/stores/useTransactionStore";
 
 export default {
   components: { TransactionPage },
   setup() {
     const navbar = ref(null);
     const amount = ref(0);
-    const balance = ref(0);
+    const balance = computed(() => transactionStore.balance); // ใช้ค่าจาก Store
     const currentView = ref("depowith");
     const showModal = ref(false);
     const transactionType = ref("");
     const tempAmount = ref(0);
-    
+
     const authStore = useAuthStore();
     const router = useRouter();
+    const transactionStore = useTransactionStore(); // ใช้ Store สำหรับธุรกรรม
 
-    watch(amount, (newValue, oldValue) => {
-      if (isNaN(newValue) || newValue < 0 || newValue > 100000) {
-        amount.value = oldValue;
-      }
-    });
+    // ฟังก์ชันตรวจสอบจำนวนเงิน
+    const validateAmount = () => {
+      if (amount.value < 0) amount.value = 0;
+      if (amount.value > 100000) amount.value = 100000;
+    };
 
+    // function click navbar
     const handleClickOutside = (event) => {
       if (
         navbar.value &&
@@ -107,6 +130,7 @@ export default {
       }
     };
 
+    // Lifecycle hook
     onMounted(() => {
       navbar.value = document.getElementById("navbarNav");
       document.addEventListener("click", handleClickOutside);
@@ -116,6 +140,7 @@ export default {
       document.removeEventListener("click", handleClickOutside);
     });
 
+    // ฟังก์ชันเปิด modal เพื่อยืนยันการฝาก/ถอน
     const openConfirmModal = (type) => {
       if (amount.value > 0 && amount.value <= 100000) {
         transactionType.value = type;
@@ -128,15 +153,23 @@ export default {
 
     const confirmDepoWith = () => {
       if (transactionType.value === "ฝาก") {
-        balance.value += tempAmount.value;
-      } else if (transactionType.value === "ถอน" && tempAmount.value <= balance.value) {
-        balance.value -= tempAmount.value;
+        transactionStore.deposit(tempAmount.value); // เรียกฟังก์ชันฝากใน Store
+        showModal.value = false;
+      } else if (transactionType.value === "ถอน") {
+        if (tempAmount.value <= transactionStore.balance) {
+          transactionStore.withdraw(tempAmount.value); // เรียกฟังก์ชันถอนใน Store
+          showModal.value = false;
+        } else {
+        alert("จำนวนเงินถอนเกินกว่ายอดคงเหลือ");
+        return;
+      }
       } else {
         alert("จำนวนเงินไม่ถูกต้อง หรือเกินยอดคงเหลือ");
+        return;
       }
-      amount.value = 0;
-      showModal.value = false;
     };
+
+
 
     const showDepoWith = () => {
       currentView.value = "depowith";
@@ -146,10 +179,9 @@ export default {
       currentView.value = "transaction";
     };
 
-
     const logout = () => {
       authStore.logout();
-      router.push('/');
+      router.push("/");
     };
 
     return {
@@ -163,9 +195,11 @@ export default {
       currentView,
       showDepoWith,
       showTran,
-      logout
+      validateAmount,
+      logout,
+      transactionStore
     };
-  },
+  }
 };
 </script>
 
