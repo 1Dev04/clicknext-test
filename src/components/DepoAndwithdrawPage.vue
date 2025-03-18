@@ -1,11 +1,13 @@
 <template>
   <!-- Section Navbar  -->
-  <nav class="navbar navbar-expand-lg px-4 border border-black bg-transparent">
+  <nav class="navbar navbar-expand-lg  border border-black bg-transparent">
     <div class="container-fluid">
-      <button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
+      
+      <button class="navbar-toggler m-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar">
+    <span class="navbar-toggler-icon"></span>
+    </button>
+
+    
       <h3 class="mt-2">Clicknext</h3>
       <button @click="logout" class="btn btn-dark">Logout</button>
     </div>
@@ -25,28 +27,36 @@
     </button>
   </div>
 
+
   <!-- Section button choose page (smail) -->
-
-  <div class="collapse navbar-collapse navbar-light bg-light fixed-top" id="navbarNav">
-    <div class="d-flex flex-column justify-content-center align-items-center">
-      <button type="button" @click="showDepoWith"
-        :class="{ 'btn-dark text-white': currentView === 'depowith', 'btn-outline-dark': currentView !== 'depowith' }"
-        class="btn btn-outline-dark border-0 mb-4 mt-3 fw-bold w-50">
-        Deposit /<br />Withdraw
-      </button>
-
-      <button type="button" @click="showTran"
-        :class="{ 'btn-dark text-white': currentView === 'transaction', 'btn-outline-dark': currentView !== 'transaction' }"
-        class="btn btn-outline-dark border-0 mb-4 fw-bold w-50">
-        Transaction
-      </button>
-    </div>
+<div class="offcanvas offcanvas-start w-75" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+  <div class="offcanvas-header d-flex flex-column justify-content-center align-items-center border border-black bg-transparent">
+    <h3 class="offcanvas-title " id="offcanvasNavbarLabel">Clicknext</h3>
   </div>
+  <div class="offcanvas-body d-flex flex-column justify-content-center align-items-center">
+    <button type="button" @click="showDepoWith"
+      :class="{ 'btn-dark text-white': currentView === 'depowith', 'btn-outline-dark': currentView !== 'depowith' }"
+      class="btn btn-outline-dark border-0 mb-4 mt-3 fw-bold w-75">
+      Deposit /<br />Withdraw
+    </button>
+
+    <button type="button" @click="showTran"
+      :class="{ 'btn-dark text-white': currentView === 'transaction', 'btn-outline-dark': currentView !== 'transaction' }"
+      class="btn btn-outline-dark border-0 mb-4 fw-bold w-75">
+      Transaction
+    </button>
+  </div>
+  <div class="d-flex flex-column justify-content-center align-items-center mb-4">
+  <button type="button" class="btn " data-bs-dismiss="offcanvas">
+    Close
+  </button>
+</div>
+</div>
 
   <!-- container Deposit/Withdraw -->
   <div class="content" v-if="currentView === 'depowith'">
     <div
-      class="container d-flex flex-column justify-content-center align-items-center mt-5 col-sm-10 col-md-10 col-lg-10 p-5">
+      class="container d-flex flex-column justify-content-center align-items-center mt-5 col-sm-5 col-md-5 col-lg-10 p-5">
       <div class="w-10 ">
         <h4 class="mt-5 text-center">
           จำนวนเงินคงเหลือ {{ transactionStore.balance }} บาท
@@ -239,4 +249,6 @@ export default {
   /* เพิ่มระยะห่างจากข้อความด้านบน */
 
 }
+
+
 </style>

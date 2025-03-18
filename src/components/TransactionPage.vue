@@ -93,7 +93,7 @@ export default {
 <template>
     <!-- จัดการ layout กำหนดภายในเป็นแนวตั้ง จัดให้อยู่กึ่งกลาง สูงเต็มจอ -->
     <div
-        class="container d-flex flex-column justify-content-center align-items-center mt-5 col-sm-5 col-md-5 col-lg-10">
+        class="container d-flex flex-column justify-content-center align-items-center mt-5 px-5 col-sm-10 col-md-10 col-lg-10">
         <h4 class="w-10">ประวัติรายการฝากถอน</h4>
         <table class="table table-bordered text-center w-100">
             <thead class="table-light">
@@ -224,4 +224,9 @@ export default {
     border: 1px solid #ccc;
     border-radius: 4px;
 }
+
+.table-responsive {
+  overflow-x: auto;
+}
+
 </style>
