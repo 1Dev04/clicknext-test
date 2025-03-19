@@ -23,9 +23,9 @@ export const useTransactionStore = defineStore('transaction', () => {
             status: "ถอน",
             email: "email@gmail.com",
         },
-   
-       
     ]);
+
+    
 
     const initBalance = 1000000;
     
@@ -37,11 +37,21 @@ export const useTransactionStore = defineStore('transaction', () => {
     });
 
     const deposit = (amount) => {
-       transactions.value.push({ status: "ฝาก", amount });
+        transactions.value.push({
+            datetime: new Date().toLocaleString("th-TH"), // กำหนดเวลาปัจจุบัน
+            amount, 
+            status: "ฝาก", 
+            email: "email@gmail.com"
+        });
     };
 
     const withdraw = (amount) => {
-        transactions.value.push({ status: "ถอน", amount });
+        transactions.value.push({
+            datetime: new Date().toLocaleString("th-TH"), // กำหนดเวลาปัจจุบัน
+            amount, 
+            status: "ถอน", 
+            email: "email@gmail.com"
+        });
       };
 
     // ฟังก์ชันแก้ไขจำนวนเงินของธุรกรรม

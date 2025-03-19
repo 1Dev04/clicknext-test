@@ -7,12 +7,11 @@ export const useAuthStore = defineStore('authStore', () => {
   const iSAuthenticated = ref(localStorage.getItem("isAuthenticated") === "true");
 
   
-  // get users from localStorage (ถ้าไม่มีให้ใช้ค่าเริ่มต้น)
+
 
 
   // function Login
-  const login = (userEmailL, passwordL, ) => {
-   
+  const login = (userEmailL, passwordL) => {
     email.value = userEmailL;
     password.value = passwordL;
     iSAuthenticated.value = true;
@@ -20,8 +19,6 @@ export const useAuthStore = defineStore('authStore', () => {
     localStorage.setItem("password", passwordL);
     localStorage.setItem("isAuthenticated", "true");
     console.log("เข้าสู่ระบบสำเร็จ");
-        
-    
   };
 
   // function logout
